@@ -18,8 +18,8 @@ RSpec.configure do |config|
   end
 
   config.after(:each, type: :request) do
-    response ||= last_response
-    request ||= last_request
+    response ||= @response # This has to be set in every test 
+    request ||= (@response.nil? ? nil? : @response.request)
 
     if response
       example_group = example.metadata[:example_group]
@@ -65,12 +65,12 @@ RSpec.configure do |config|
         end
 
         # Response
-        f.write "+ Response #{response.status} #{response.content_type}\n\n"
+        f.write "+ Response #{response.code} #{response.content_type}\n\n"
 
         if response.body.present? && response.content_type =~ /application\/json/
           f.write "#{JSON.pretty_generate(JSON.parse(response.body))}\n\n".indent(8)
         end
-      end unless response.status == 401 || response.status == 403 || response.status == 301
+      end unless response.code == 401 || response.code == 403 || response.code == 301
     end
   end
 end
